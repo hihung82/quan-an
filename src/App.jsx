@@ -2,11 +2,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "./supabase";
 import { Link } from "react-router-dom";
 
-<Link to="/admin">
-  <button style={{ position: "absolute", top: 10, right: 10 }}>
-    Admin
-  </button>
-</Link>
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -80,6 +75,11 @@ function App() {
 
   return (
     <div style={{ padding: 20 }}>
+      <Link to="/admin">
+        <button style={{ position: "absolute", top: 10, right: 10 }}>
+          Admin
+        </button>
+      </Link>
       <h1>MENU QUÁN ĂN</h1>
 
       {products.map(product => (
@@ -130,6 +130,8 @@ function App() {
       <br />
       <button onClick={placeOrder}>Đặt hàng</button>
     </div>
+
+    
   );
 }
 
