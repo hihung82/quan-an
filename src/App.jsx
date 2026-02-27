@@ -150,14 +150,12 @@ setCart([]);
       />
       <br />
       <button onClick={placeOrder}>Đặt hàng</button>
-
-      {showSuccess && (
+      {showSuccess && dingSound.play() && (
   <div className="overlay">
     <div className="popup">
       <h3>🎉 Đặt hàng thành công!</h3>
       <p style={{ margin: "15px 0" }}>
         Quán sẽ chuẩn bị món ngay.
-        dingSound.play();
       </p>
 
       <button
