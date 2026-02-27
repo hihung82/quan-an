@@ -54,26 +54,22 @@ function Admin() {
         (payload) => {
   const newOrder = payload.new;
 
-  // 1️⃣ Thêm vào danh sách
-  setOrders((prev) => [newOrder, ...prev]);
-
-  // 2️⃣ Phát âm thanh
+async (payload) => {
   playSound();
 
-  // 3️⃣ Hiện thông báo hệ thống
-  if ("Notification" in window) {
-    if (Notification.permission === "granted") {
-      new Notification("🔔 Đơn hàng mới!", {
-        body: `${newOrder.customer_name} - ${newOrder.total_price} đ`,
-        icon: "/logo.png",
-        tag: "new-order"
-      });
-    }
+  if ("Notification" in window && Notification.permission === "granted") {
+    new Notification("🔔 Đơn hàng mới!", {
+      body: `${payload.new.customer_name} - ${payload.new.total_price} đ`,
+      icon: "/logo.png",
+      tag: "new-order"
+    });
   }
 
-  // 4️⃣ Làm nhấp nháy tab
   flashTitle();
-}
+
+  // 🔥 QUAN TRỌNG: gọi lại fetch để có danh sách món
+  await fetchOrders();
+}}
       )
       .subscribe();
 
@@ -83,14 +79,23 @@ function Admin() {
   }, [isAuth]);
 
   async function fetchOrders() {
-    const { data } = await supabase
-      .from("orders")
-      .select("*")
-      .eq("status", "pending")
-      .order("created_at", { ascending: false });
+  const { data } = await supabase
+    .from("orders")
+    .select(`
+      *,
+      order_items (
+        quantity,
+        price,
+        products (
+          name
+        )
+      )
+    `)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
 
-    setOrders(data || []);
-  }
+  setOrders(data || []);
+}
 
   async function completeOrder(id) {
     await supabase
@@ -169,6 +174,14 @@ function Admin() {
           <p>
             <b>{order.total_price} đ</b>
           </p>
+          <div style={{ marginTop: 10 }}>
+  <b>Danh sách món:</b>
+  {order.order_items?.map((item, index) => (
+    <div key={index}>
+      - {item.products?.name} x {item.quantity}
+    </div>
+  ))}
+</div>
 
           <button onClick={() => completeOrder(order.id)}>
             Hoàn thành
