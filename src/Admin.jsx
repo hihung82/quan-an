@@ -72,6 +72,11 @@ function Admin() {
           <h3>{order.customer_name}</h3>
           <p>{order.phone}</p>
           <p>{order.address}</p>
+          {order.note && (
+        <p style={{ marginTop: 8, fontStyle: "italic", color: "#555" }}>
+        📝 Ghi chú: {order.note}
+        </p>
+             )}
           <p>
             <b>{order.total_price} đ</b>
           </p>
