@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "./supabase";
 import { Link } from "react-router-dom";
 import "./index.css";
+import ChatBot from "./ChatBot";
+
 
 
 function App() {
@@ -44,6 +46,10 @@ function App() {
   );
 
   async function placeOrder() {
+    if (cart.length === 0) {
+  alert("Vui lòng chọn món");
+  return;
+}
     if (!form.name || !form.phone || !form.address) {
       alert("Vui lòng nhập đầy đủ thông tin");
       return;
@@ -92,6 +98,8 @@ setCart([]);
   <Link to="/admin">
     <button className="admin-btn">Admin</button>
   </Link>
+
+  <ChatBot />
 </div>
 
 
@@ -116,11 +124,18 @@ setCart([]);
 </div>
 
       <h2>Giỏ hàng</h2>
-      {cart.map(item => (
-        <div key={item.id}>
-          {item.name} x {item.quantity}
-        </div>
-      ))}
+
+{cart.length === 0 ? (
+  <p style={{ color: "#888", fontStyle: "italic" }}>
+    Vui lòng chọn món
+  </p>
+) : (
+  cart.map(item => (
+    <div key={item.id}>
+      {item.name} x {item.quantity}
+    </div>
+  ))
+)}
 
       <h3>Tổng: {total} đ</h3>
 
@@ -172,5 +187,6 @@ setCart([]);
     
   );
 }
+
 
 export default App;
