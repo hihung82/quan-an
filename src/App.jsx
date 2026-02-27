@@ -9,6 +9,7 @@ import ChatBot from "./ChatBot";
 function App() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
+  const cartItem = cart.find((item) => item.id === product.id);
   const [showSuccess, setShowSuccess] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -40,6 +41,37 @@ function App() {
     }
   }
 
+  function increaseQuantity(id) {
+  setCart((prev) =>
+    prev.map((item) =>
+      item.id === id
+        ? { ...item, quantity: item.quantity + 1 }
+        : item
+    )
+  );
+}
+
+function decreaseQuantity(id) {
+  setCart((prev) =>
+    prev
+      .map((item) =>
+        item.id === id
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      )
+      .filter((item) => item.quantity > 0)
+  );
+}
+
+{cartItem ? (
+  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+    <button onClick={() => decreaseQuantity(product.id)}>-</button>
+    <span>{cartItem.quantity}</span>
+    <button onClick={() => increaseQuantity(product.id)}>+</button>
+  </div>
+) : (
+  <button onClick={() => addToCart(product)}>Thêm</button>
+)}
   const total = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
