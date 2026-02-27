@@ -78,6 +78,8 @@ setCart([]);
     setForm({ name: "", phone: "", address: "", note: "" });
   }
 
+  const dingSound = new Audio("/ding.mp3");
+
   return (
     <div style={{ padding: 20 }}>
       <div className="header">
@@ -155,6 +157,7 @@ setCart([]);
       <h3>🎉 Đặt hàng thành công!</h3>
       <p style={{ margin: "15px 0" }}>
         Quán sẽ chuẩn bị món ngay.
+        dingSound.play();
       </p>
 
       <button

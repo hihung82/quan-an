@@ -7,9 +7,11 @@ function Admin() {
   const [input, setInput] = useState("");
   const [isAuth, setIsAuth] = useState(false);
   const [orders, setOrders] = useState([]);
+  const dingSound = new Audio("/ding.mp3");
 
   useEffect(() => {
     if (isAuth) {
+        dingSound.play();  
       fetchOrders();
     }
   }, [isAuth]);
