@@ -16,6 +16,27 @@ function Admin() {
     audio.play().catch(() => {});
   };
 
+  function flashTitle() {
+  const originalTitle = document.title;
+  let count = 0;
+
+  const interval = setInterval(() => {
+    if (document.title === "🔔 ĐƠN MỚI !!!") {
+      document.title = originalTitle;
+    } else {
+      document.title = "🔔 ĐƠN MỚI !!!";
+    }
+
+    count++;
+
+    // Sau 5 lần thì dừng
+    if (count >= 5) {
+      clearInterval(interval);
+      document.title = originalTitle;
+    }
+  }, 1000);
+}
+
   useEffect(() => {
     if (!isAuth) return;
 
@@ -31,10 +52,28 @@ function Admin() {
           table: "orders",
         },
         (payload) => {
-          console.log("Đơn mới:", payload);
-          setOrders((prev) => [payload.new, ...prev]); // thêm trực tiếp
-          playSound(); // 🔔 kêu khi có đơn mới
-        }
+  const newOrder = payload.new;
+
+  // 1️⃣ Thêm vào danh sách
+  setOrders((prev) => [newOrder, ...prev]);
+
+  // 2️⃣ Phát âm thanh
+  playSound();
+
+  // 3️⃣ Hiện thông báo hệ thống
+  if ("Notification" in window) {
+    if (Notification.permission === "granted") {
+      new Notification("🔔 Đơn hàng mới!", {
+        body: `${newOrder.customer_name} - ${newOrder.total_price} đ`,
+        icon: "/logo.png",
+        tag: "new-order"
+      });
+    }
+  }
+
+  // 4️⃣ Làm nhấp nháy tab
+  flashTitle();
+}
       )
       .subscribe();
 
@@ -62,14 +101,26 @@ function Admin() {
     setOrders((prev) => prev.filter((o) => o.id !== id));
   }
 
-  function handleLogin() {
-    if (input === ADMIN_PASSWORD) {
-      localStorage.setItem("admin", "true");  // ✅ lưu login
-      setIsAuth(true);
-    } else {
-      alert("Sai mật khẩu");
+ function handleLogin() {
+  if (input === ADMIN_PASSWORD) {
+    localStorage.setItem("admin", "true");
+    setIsAuth(true);
+
+    // xin quyền thông báo
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
     }
+
+    // mở quyền âm thanh
+    const audio = new Audio("/ding.mp3");
+    audio.play().then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+    }).catch(() => {});
+  } else {
+    alert("Sai mật khẩu");
   }
+}
 
   function handleLogout() {
     localStorage.removeItem("admin");
