@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./supabase";
 import { Link } from "react-router-dom";
+import "./index.css";
 
 
 function App() {
