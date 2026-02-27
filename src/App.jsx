@@ -88,15 +88,19 @@ setCart([]);
       <h1>MENU QUÁN ĂN</h1>
 
       {products.map(product => (
-        <div key={product.id} style={{ border: "1px solid #ccc", padding: 10, marginBottom: 10 }}>
-          <img src={product.image_url} width="200" />
-          <h3>{product.name}</h3>
-          <p>{product.description}</p>
-          <p><b>{product.price} đ</b></p>
-          <button onClick={() => addToCart(product)}>
-            Thêm vào giỏ
-          </button>
-        </div>
+        <div className="menu-grid">
+  {products.map(product => (
+    <div key={product.id} className="product-card">
+      <img src={product.image_url} alt={product.name} />
+      <h3>{product.name}</h3>
+      <p>{product.description}</p>
+      <p><b>{product.price} đ</b></p>
+      <button className="button" onClick={() => addToCart(product)}>
+        Thêm vào giỏ
+      </button>
+    </div>
+  ))}
+</div>
       ))}
 
       <h2>Giỏ hàng</h2>
