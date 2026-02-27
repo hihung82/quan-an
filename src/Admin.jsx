@@ -37,12 +37,15 @@ function Admin() {
   }, 1000);
 }
 
-  useEffect(() => {
-    if (!isAuth) return;
+ useEffect(() => {
+  if (!isAuth) return;
 
-    fetchOrders();
+  fetchOrders();
 
-    const channel = supabase
+  let channel;
+
+  function subscribeRealtime() {
+    channel = supabase
       .channel("orders-channel")
       .on(
         "postgres_changes",
@@ -51,32 +54,50 @@ function Admin() {
           schema: "public",
           table: "orders",
         },
-        (payload) => {
-  const newOrder = payload.new;
+        async (payload) => {
+          playSound();
 
-async (payload) => {
-  playSound();
+          if (
+            "Notification" in window &&
+            Notification.permission === "granted"
+          ) {
+            new Notification("🔔 Đơn hàng mới!", {
+              body: `${payload.new.customer_name} - ${payload.new.total_price} đ`,
+              icon: "/logo.png",
+            });
+          }
 
-  if ("Notification" in window && Notification.permission === "granted") {
-    new Notification("🔔 Đơn hàng mới!", {
-      body: `${payload.new.customer_name} - ${payload.new.total_price} đ`,
-      icon: "/logo.png",
-      tag: "new-order"
-    });
+          flashTitle();
+          await fetchOrders();
+        }
+      )
+      .subscribe((status) => {
+        console.log("Realtime status:", status);
+
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.log("Mất kết nối → subscribe lại");
+          subscribeRealtime();
+        }
+      });
   }
 
-  flashTitle();
+  subscribeRealtime();
 
-  // 🔥 QUAN TRỌNG: gọi lại fetch để có danh sách món
-  await fetchOrders();
-}}
-      )
-      .subscribe();
+  // Khi quay lại tab → fetch lại
+  const handleFocus = () => {
+    console.log("Tab active lại → fetch lại");
+    fetchOrders();
+  };
 
-    return () => {
+  window.addEventListener("focus", handleFocus);
+
+  return () => {
+    if (channel) {
       supabase.removeChannel(channel);
-    };
-  }, [isAuth]);
+    }
+    window.removeEventListener("focus", handleFocus);
+  };
+}, [isAuth]);
 
   async function fetchOrders() {
   const { data } = await supabase
