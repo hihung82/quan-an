@@ -73,3 +73,20 @@ input {
   border-radius: 8px;
   border: 1px solid #ddd;
 }
+
+.cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 500px;
+  margin: auto;
+  background: white;
+  padding: 15px;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}

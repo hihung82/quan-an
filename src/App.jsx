@@ -7,6 +7,7 @@ import "./index.css";
 function App() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -59,6 +60,9 @@ function App() {
       })
       .select()
       .single();
+
+      setShowSuccess(true);
+setCart([]);
 
     for (let item of cart) {
       await supabase.from("order_items").insert({
@@ -130,8 +134,26 @@ function App() {
       />
       <br />
       <button onClick={placeOrder}>Đặt hàng</button>
-    </div>
 
+      {showSuccess && (
+  <div className="overlay">
+    <div className="popup">
+      <h3>🎉 Đặt hàng thành công!</h3>
+      <p style={{ margin: "15px 0" }}>
+        Quán sẽ chuẩn bị món ngay.
+      </p>
+
+      <button
+        className="button"
+        onClick={() => setShowSuccess(false)}
+      >
+        OK
+      </button>
+    </div>
+  </div>
+)}
+    </div>
+    
     
   );
 }
