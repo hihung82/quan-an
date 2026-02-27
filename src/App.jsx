@@ -92,13 +92,9 @@ setCart([]);
   </Link>
 </div>
 
-<h1 className="menu-title">MENU</h1>
 
-  <Link to="/admin">
-    <button className="admin-btn">Admin</button>
-  </Link>
 </div>
-
+<h1 className="menu-title">MENU</h1>
       <div className="menu-grid">
   {products.map(product => (
     <div key={product.id} className="product-card">

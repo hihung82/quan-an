@@ -209,15 +209,7 @@ input {
   opacity: 0.9;
 }
 
-/* HEADER */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px 40px;
-  position: relative;
-  border-bottom: 1px solid #eee;
-}
+
 
 /* Thanh trên */
 .top-bar {
@@ -242,8 +234,8 @@ input {
 }
 
 .logo {
-  width: 15px;
-  height: 15px;
+  width: 30px;
+  height: 30px;
   object-fit: cover;
   border-radius: 50%;
 }
