@@ -1,27 +1,18 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./supabase";
 
+const ADMIN_PASSWORD = "123456"; // đổi mật khẩu tại đây
+
 function Admin() {
+  const [input, setInput] = useState("");
+  const [isAuth, setIsAuth] = useState(false);
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    fetchOrders();
-
-    const channel = supabase
-      .channel("orders")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
-        () => {
-          fetchOrders();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+    if (isAuth) {
+      fetchOrders();
+    }
+  }, [isAuth]);
 
   async function fetchOrders() {
     const { data } = await supabase
@@ -38,18 +29,52 @@ function Admin() {
       .from("orders")
       .update({ status: "completed" })
       .eq("id", id);
+
+    fetchOrders();
+  }
+
+  function handleLogin() {
+    if (input === ADMIN_PASSWORD) {
+      setIsAuth(true);
+    } else {
+      alert("Sai mật khẩu");
+    }
+  }
+
+  if (!isAuth) {
+    return (
+      <div style={{ padding: 20 }}>
+        <h1>Admin</h1>
+        <input
+          type="password"
+          placeholder="Nhập mật khẩu"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button onClick={handleLogin}>Đăng nhập</button>
+      </div>
+    );
   }
 
   return (
     <div style={{ padding: 20 }}>
       <h1>Đơn hàng mới</h1>
 
-      {orders.map(order => (
-        <div key={order.id} style={{ border: "1px solid #ccc", marginBottom: 10, padding: 10 }}>
+      {orders.map((order) => (
+        <div
+          key={order.id}
+          style={{
+            border: "1px solid #ccc",
+            marginBottom: 10,
+            padding: 10,
+          }}
+        >
           <h3>{order.customer_name}</h3>
           <p>{order.phone}</p>
           <p>{order.address}</p>
-          <p><b>{order.total_price} đ</b></p>
+          <p>
+            <b>{order.total_price} đ</b>
+          </p>
           <button onClick={() => completeOrder(order.id)}>
             Hoàn thành
           </button>

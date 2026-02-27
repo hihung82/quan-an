@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./supabase";
+import { Link } from "react-router-dom";
+
+<Link to="/admin">
+  <button style={{ position: "absolute", top: 10, right: 10 }}>
+    Admin
+  </button>
+</Link>
 
 function App() {
   const [products, setProducts] = useState([]);
