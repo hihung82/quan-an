@@ -80,12 +80,18 @@ setCart([]);
 
   return (
     <div style={{ padding: 20 }}>
-      <Link to="/admin">
-        <button style={{ position: "absolute", top: 10, right: 10 }}>
-          Admin
-        </button>
-      </Link>
-      <h1>MENU QUÁN ĂN</h1>
+      <div className="header">
+  <div className="logo-section">
+    <img src="/logo.png" alt="logo" className="logo" />
+    <span className="shop-name">QUÁN ĂN NGON</span>
+  </div>
+
+  <h1 className="menu-title">MENU</h1>
+
+  <Link to="/admin">
+    <button className="admin-btn">Admin</button>
+  </Link>
+</div>
 
       <div className="menu-grid">
   {products.map(product => (
