@@ -208,3 +208,69 @@ input {
 .button:hover {
   opacity: 0.9;
 }
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 40px;
+  position: relative;
+  border-bottom: 1px solid #eee;
+}
+
+/* Thanh trên */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+}
+
+/* Logo + tên */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Logo + tên */
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  width: 15px;
+  height: 15px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.shop-name {
+  font-weight: bold;
+  font-size: 15px;
+}
+
+/* Chữ MENU to ở giữa */
+.menu-title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: bold;
+  margin: 10px 0 30px 0;
+}
+
+/* Nút admin */
+.admin-btn {
+  padding: 6px 14px;
+  background: black;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.admin-btn:hover {
+  opacity: 0.85;
+}

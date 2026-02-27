@@ -81,12 +81,18 @@ setCart([]);
   return (
     <div style={{ padding: 20 }}>
       <div className="header">
-  <div className="logo-section">
+  <div className="top-bar">
+  <div className="brand">
     <img src="/logo.png" alt="logo" className="logo" />
-    <span className="shop-name">QUÁN ĂN NGON</span>
+    <span className="shop-name">CHỊ BÍCH BÁNH TRÁNG</span>
   </div>
 
-  <h1 className="menu-title">MENU</h1>
+  <Link to="/admin">
+    <button className="admin-btn">Admin</button>
+  </Link>
+</div>
+
+<h1 className="menu-title">MENU</h1>
 
   <Link to="/admin">
     <button className="admin-btn">Admin</button>
