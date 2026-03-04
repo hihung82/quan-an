@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./supabase";
-
-const ADMIN_PASSWORD = "123456";
+import { useNavigate } from "react-router-dom";
 
 function Admin() {
-  const [input, setInput] = useState("");
-  const [isAuth, setIsAuth] = useState(
-    localStorage.getItem("admin") === "true"
-  );
+  const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+  if ("Notification" in window) {
+    Notification.requestPermission();
+  }
+}, []);
 
   // 🔔 phát âm thanh
   const playSound = () => {
@@ -17,156 +20,120 @@ function Admin() {
   };
 
   function flashTitle() {
-  const originalTitle = document.title;
-  let count = 0;
+    const originalTitle = document.title;
+    let count = 0;
 
-  const interval = setInterval(() => {
-    if (document.title === "🔔 ĐƠN MỚI !!!") {
-      document.title = originalTitle;
+    const interval = setInterval(() => {
+      document.title =
+        document.title === "🔔 ĐƠN MỚI !!!"
+          ? originalTitle
+          : "🔔 ĐƠN MỚI !!!";
+
+      count++;
+      if (count >= 5) {
+        clearInterval(interval);
+        document.title = originalTitle;
+      }
+    }, 1000);
+  }
+
+  // 🔐 Kiểm tra đăng nhập
+  useEffect(() => {
+  const checkUser = async () => {
+    const { data } = await supabase.auth.getUser();
+    console.log("USER:", data.user);
+
+    if (!data.user) {
+      navigate("/login");
     } else {
-      document.title = "🔔 ĐƠN MỚI !!!";
+      setUser(data.user);
+    }
+  };
+
+  checkUser();
+}, []);
+
+  // 📦 Lấy đơn hàng
+  async function fetchOrders() {
+    const { data, error } = await supabase
+      .from("orders")
+      .select(`
+        *,
+        order_items (
+          quantity,
+          price,
+          products (
+            name
+          )
+        )
+      `)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Lỗi lấy đơn:", error);
+      return;
     }
 
-    count++;
+    setOrders(data || []);
+  }
 
-    // Sau 5 lần thì dừng
-    if (count >= 5) {
-      clearInterval(interval);
-      document.title = originalTitle;
-    }
-  }, 1000);
-}
-
+  // 🚀 Realtime khi có đơn mới
  useEffect(() => {
-  if (!isAuth) return;
+  if (!user) return;
 
   fetchOrders();
 
-  let channel;
+  const channel = supabase
+    .channel("orders-channel")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "orders",
+      },
+      async (payload) => {
+        console.log("Change detected:", payload);
 
-  function subscribeRealtime() {
-    channel = supabase
-      .channel("orders-channel")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "orders",
-        },
-        async (payload) => {
+        if (payload.eventType === "INSERT") {
           playSound();
-
-          if (
-            "Notification" in window &&
-            Notification.permission === "granted"
-          ) {
-            new Notification("🔔 Đơn hàng mới!", {
-              body: `${payload.new.customer_name} - ${payload.new.total_price} đ`,
-              icon: "/logo.png",
-            });
-          }
-
           flashTitle();
-          await fetchOrders();
         }
-      )
-      .subscribe((status) => {
-        console.log("Realtime status:", status);
 
-        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          console.log("Mất kết nối → subscribe lại");
-          subscribeRealtime();
-        }
-      });
-  }
-
-  subscribeRealtime();
-
-  // Khi quay lại tab → fetch lại
-  const handleFocus = () => {
-    console.log("Tab active lại → fetch lại");
-    fetchOrders();
-  };
-
-  window.addEventListener("focus", handleFocus);
+        // Luôn fetch lại để đảm bảo đúng trạng thái
+        fetchOrders();
+      }
+    )
+    .subscribe();
 
   return () => {
-    if (channel) {
-      supabase.removeChannel(channel);
-    }
-    window.removeEventListener("focus", handleFocus);
+    supabase.removeChannel(channel);
   };
-}, [isAuth]);
+}, [user]);
 
-  async function fetchOrders() {
-  const { data } = await supabase
+  // ✅ Hoàn thành đơn
+ async function completeOrder(id) {
+  const { error } = await supabase
     .from("orders")
-    .select(`
-      *,
-      order_items (
-        quantity,
-        price,
-        products (
-          name
-        )
-      )
-    `)
-    .eq("status", "pending")
-    .order("created_at", { ascending: false });
+    .update({ status: "completed" })
+    .eq("id", id);
 
-  setOrders(data || []);
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  fetchOrders(); // luôn sync lại từ DB
 }
 
-  async function completeOrder(id) {
-    await supabase
-      .from("orders")
-      .update({ status: "completed" })
-      .eq("id", id);
-
-    setOrders((prev) => prev.filter((o) => o.id !== id));
+  // 🚪 Logout
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    navigate("/login");
   }
 
- function handleLogin() {
-  if (input === ADMIN_PASSWORD) {
-    localStorage.setItem("admin", "true");
-    setIsAuth(true);
-
-    // xin quyền thông báo
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-
-    // mở quyền âm thanh
-    const audio = new Audio("/ding.mp3");
-    audio.play().then(() => {
-      audio.pause();
-      audio.currentTime = 0;
-    }).catch(() => {});
-  } else {
-    alert("Sai mật khẩu");
-  }
-}
-
-  function handleLogout() {
-    localStorage.removeItem("admin");
-    setIsAuth(false);
-  }
-
-  if (!isAuth) {
-    return (
-      <div style={{ padding: 20 }}>
-        <h1>Admin</h1>
-        <input
-          type="password"
-          placeholder="Nhập mật khẩu"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <button onClick={handleLogin}>Đăng nhập</button>
-      </div>
-    );
-  }
+  if (!user) return <div>Chưa đăng nhập</div>;
 
   return (
     <div style={{ padding: 20 }}>
@@ -182,27 +149,36 @@ function Admin() {
             padding: 10,
           }}
         >
-          <h3>{order.customer_name}</h3>
-          <p>{order.phone}</p>
-          <p>{order.address}</p>
+          <h3 style={{ fontStyle: "italic", color: "#555" }}>
+            Khách hàng: {order.customer_name}
+          </h3>
+
+          <p style={{ fontStyle: "italic", color: "#555" }}>
+            Số điện thoại: {order.phone}
+          </p>
+
+          <p style={{ fontStyle: "italic", color: "#555" }}>
+            Địa chỉ: {order.address}
+          </p>
 
           {order.note && (
-            <p style={{ marginTop: 8, fontStyle: "italic", color: "#555" }}>
+            <p style={{ fontStyle: "italic", color: "#555" }}>
               📝 Ghi chú: {order.note}
             </p>
           )}
 
           <p>
-            <b>{order.total_price} đ</b>
+            Tổng tiền: <b>{order.total_amount} đ</b>
           </p>
+
           <div style={{ marginTop: 10 }}>
-  <b>Danh sách món:</b>
-  {order.order_items?.map((item, index) => (
-    <div key={index}>
-      - {item.products?.name} x {item.quantity}
-    </div>
-  ))}
-</div>
+            <b>Danh sách món:</b>
+            {order.order_items?.map((item, index) => (
+              <div key={index}>
+                - {item.products?.name} x {item.quantity}
+              </div>
+            ))}
+          </div>
 
           <button onClick={() => completeOrder(order.id)}>
             Hoàn thành

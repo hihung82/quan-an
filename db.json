@@ -1,0 +1,15 @@
+{
+  "orders": [],
+  "foods": [
+    {
+      "id": 1,
+      "name": "Bánh mì",
+      "price": 20000
+    },
+    {
+      "id": 2,
+      "name": "Trà sữa",
+      "price": 30000
+    }
+  ]
+}
