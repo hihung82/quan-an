@@ -239,7 +239,7 @@ async function uploadImage() {
   return () => {
     supabase.removeChannel(channel);
   };
-}, [user]);
+}, [user, shop]);
 
   // ✅ Hoàn thành đơn
  async function completeOrder(id) {
