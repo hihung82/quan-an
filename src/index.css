@@ -240,21 +240,21 @@ input {
 }
 
 .logo {
-  width: 70px;
-  height: 70px;
+  width: 40px;
+  height: 40px;
   object-fit: cover;
   border-radius: 50%;
 }
 
 .shop-name {
   font-weight: bold;
-  font-size: 30px;
+  font-size: 20px;
 }
 
 /* Chữ MENU to ở giữa */
 .menu-title {
   text-align: center;
-  font-size: 50px;
+  font-size: 30px;
   font-weight: bold;
   margin: 10px 0 30px 0;
 }
@@ -271,4 +271,122 @@ input {
 
 .admin-btn:hover {
   opacity: 0.85;
+}
+
+#chat-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #ff6600;
+  color: white;
+  padding: 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+#chat-box {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 300px;
+  height: 400px;
+  background: white;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+}
+
+.hidden {
+  display: none;
+}
+
+.chat-header {
+  background: #ff6600;
+  color: white;
+  padding: 10px;
+  text-align: center;
+}
+
+#chat-messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+#chat-input {
+  border: none;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+
+
+.shop-header {
+  display: flex;
+  justify-content: center;   /* căn giữa ngang */
+  align-items: center;
+  gap: 12px;
+
+  margin-top: 2px;
+  margin-bottom: 10px;
+}
+
+.shop-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.shop-name {
+  font-size: 50px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.brand-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0284c7;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.product-card {
+  position: relative;
+}
+
+.add-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+.add-card{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:40px;
+  cursor:pointer;
+}
+
+.add-product-form{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
 }

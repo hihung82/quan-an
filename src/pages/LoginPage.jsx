@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { supabase } from "./supabase";
+import { supabase } from "../services/supabase";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom"
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { slug } = useParams()
+  console.log("slug:", slug)
 
   async function handleLogin() {
     const { error } = await supabase.auth.signInWithPassword({
@@ -16,7 +19,7 @@ function Login() {
     if (error) {
       alert("Sai email hoặc mật khẩu");
     } else {
-      navigate("/admin");
+      navigate(`/admin/${slug}`)
     }
   }
 
