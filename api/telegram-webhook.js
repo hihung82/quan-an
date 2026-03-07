@@ -22,16 +22,18 @@ export default async function handler(req, res) {
     console.log("CHAT ID:", chatId)
     console.log("TEXT:", text)
 
-    if (text === "/start") {
+  if (text.startsWith("/start")) {
 
-      const { data, error } = await supabase
-        .from("telegram_connections")
-        .insert({
-          shop_id: "demo_shop",   // thêm dòng này
-          chat_id: chatId
-        })
+    const shopId = text.split(" ")[1]
 
-      console.log("SUPABASE:", data, error)
+    const { data, error } = await supabase
+      .from("telegram_connections")
+      .insert({
+        shop_id: shopId,
+        chat_id: chatId
+      })
+
+    console.log("SUPABASE:", data, error)
 
       await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: "POST",
