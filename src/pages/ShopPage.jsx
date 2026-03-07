@@ -7,6 +7,7 @@ import { createOrderWithItems } from "../services/orderService"
 import  ChatBot  from "../features/chatbot/ChatBot"
 import "../index.css"
 import { useNavigate } from "react-router-dom"
+import { sendTelegram } from "../services/telegramService"
 
 function App() {
   const { slug } = useParams()
@@ -61,6 +62,25 @@ useEffect(() => {
   }
   try {
     await createOrderWithItems(shop, form, cart, total)
+    const itemsText = cart
+    .map(item => `${item.name} x${item.quantity}`)
+    .join("\n")
+  await sendTelegram(
+    shop.id,
+    `
+  🔔 Đơn hàng mới
+
+  Quán: ${shop.name}
+  Khách: ${form.name}
+  SĐT: ${form.phone}
+  Địa chỉ: ${form.address}
+
+  Món:
+  ${itemsText}
+
+  Tổng: ${total}đ
+  `
+  )
     setShowSuccess(true)
     setCart([])
   } catch (err) {
@@ -186,7 +206,7 @@ useEffect(() => {
       </div>
     )}
 
-    <ChatBot />
+    <ChatBot shopId={shop?.id} />
 
   </div>
 );
