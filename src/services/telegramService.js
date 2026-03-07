@@ -13,7 +13,7 @@ export async function sendTelegram(shopId, message) {
 
   for (let row of data) {
 
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    await fetch("/api/send-order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
