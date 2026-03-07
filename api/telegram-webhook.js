@@ -7,38 +7,42 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
   try {
+
     if (req.method !== "POST") {
       return res.status(200).send("ok")
     }
 
-    const data = req.body
-    const message = data?.message
+    const message = req.body?.message
 
-    if (message) {
-      const chatId = message.chat.id
-      const text = message.text
+    if (!message) return res.status(200).send("ok")
 
-      console.log("CHAT ID:", chatId)
+    const chatId = message.chat.id
+    const text = message.text
 
-      if (text === "/start") {
+    console.log("CHAT ID:", chatId)
+    console.log("TEXT:", text)
 
-        await supabase
-          .from("telegram_connections")
-          .insert({
-            chat_id: chatId
-          })
+    if (text === "/start") {
 
-        await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: "Bot đã kết nối với hệ thống ✅"
-          })
+      const { data, error } = await supabase
+        .from("telegram_connections")
+        .insert({
+          shop_id: "demo_shop",   // thêm dòng này
+          chat_id: chatId
         })
-      }
+
+      console.log("SUPABASE:", data, error)
+
+      await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: "Bot đã kết nối với hệ thống ✅"
+        })
+      })
     }
 
     return res.status(200).send("ok")
