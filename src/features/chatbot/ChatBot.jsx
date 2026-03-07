@@ -1,36 +1,49 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { supabase } from "../../services/supabase"
 
-export default function ChatBot() {
-  const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
+export default function ChatBot({ shopId }) {
 
-  const responses = {
-    "mở cửa": "Quán mở cửa từ 14h đến 23h tối.",
-    "địa chỉ": "Quán ở 03 Đường Nguyễn Văn Linh, Vĩnh Phúc.",
-    "ship": "Quán có giao hàng trong bán kính 5km.",
-    "menu": "Bạn có thể xem menu ngay trên trang chủ nhé!",
-    "bán chạy": "Món bán chạy nhất là bánh tráng nướng và bánh tráng trộn."
-  };
+  const [open, setOpen] = useState(false)
+  const [messages, setMessages] = useState([])
+  const [input, setInput] = useState("")
+  const [responses, setResponses] = useState([])
+
+  // load responses của quán
+  useEffect(() => {
+    if (!shopId) return
+
+    async function load() {
+      const { data } = await supabase
+        .from("chatbot_responses")
+        .select("*")
+        .eq("shop_id", shopId)
+
+      setResponses(data || [])
+    }
+
+    load()
+  }, [shopId])
 
   const handleSend = () => {
-    if (!input.trim()) return;
 
-    const userMessage = { text: input, sender: "user" };
-    let reply = "Xin lỗi, vui lòng gọi 09xxxxxxxx để được hỗ trợ.";
+    if (!input.trim()) return
 
-    for (let key in responses) {
-      if (input.toLowerCase().includes(key)) {
-        reply = responses[key];
-        break;
+    const userMessage = { text: input, sender: "user" }
+
+    let reply = "Xin lỗi, vui lòng gọi quán để được hỗ trợ."
+
+    for (let r of responses) {
+      if (input.toLowerCase().includes(r.keyword)) {
+        reply = r.response
+        break
       }
     }
 
-    const botMessage = { text: reply, sender: "bot" };
+    const botMessage = { text: reply, sender: "bot" }
 
-    setMessages([...messages, userMessage, botMessage]);
-    setInput("");
-  };
+    setMessages([...messages, userMessage, botMessage])
+    setInput("")
+  }
 
   return (
     <>
@@ -78,6 +91,7 @@ export default function ChatBot() {
             Hỗ trợ khách hàng
           </div>
 
+          {/* messages */}
           <div
             style={{
               flex: 1,
@@ -98,6 +112,7 @@ export default function ChatBot() {
             ))}
           </div>
 
+          {/* input */}
           <div style={{ display: "flex" }}>
             <input
               style={{ flex: 1, padding: 10, border: "none" }}
@@ -106,10 +121,13 @@ export default function ChatBot() {
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Nhập tin nhắn..."
             />
-            <button onClick={handleSend}>Gửi</button>
+
+            <button onClick={handleSend}>
+              Gửi
+            </button>
           </div>
         </div>
       )}
     </>
-  );
+  )
 }
