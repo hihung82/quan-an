@@ -240,8 +240,8 @@ input {
 }
 
 .logo {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
   border-radius: 50%;
 }
@@ -389,4 +389,13 @@ input {
   padding:20px;
   border-radius:10px;
   margin-bottom:20px;
+}
+
+.menu-toggle{
+  background:#111;
+  color:white;
+  padding:10px 16px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
 }

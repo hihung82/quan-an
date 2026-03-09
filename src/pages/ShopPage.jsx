@@ -97,7 +97,7 @@ useEffect(() => {
       <div className="top-bar">
         <div className="brand">
           <img src="/logo.png" alt="logo" className="logo" />
-          <span className="brand-name">PEACARIUS</span>
+          <span className="brand-name">MONLEO</span>
         </div>
 
         <button
