@@ -19,7 +19,7 @@ export async function sendTelegram(shopId, message) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        chat_id: row.chat_id,
+        shop_id: shopId,
         order_text: message
       })
     })
