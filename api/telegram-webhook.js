@@ -18,31 +18,35 @@ export default async function handler(req, res) {
        1️⃣ xử lý nút bấm telegram
     ---------------------------- */
 
-    if (body.callback_query) {
+if (body.callback_query) {
 
-      const action = body.callback_query.data
-      const orderId = action.split("_")[1]
+  const action = body.callback_query.data
+  const orderId = action.split("_")[1]
 
-      if (action.startsWith("confirm")) {
+  if (action.startsWith("confirm")) {
+    await supabase
+      .from("orders")
+      .update({ status: "preparing" })
+      .eq("id", orderId)
+  }
 
-        await supabase
-          .from("orders")
-          .update({ status: "preparing" })
-          .eq("id", orderId)
+  if (action.startsWith("done")) {
+    await supabase
+      .from("orders")
+      .update({ status: "completed" })
+      .eq("id", orderId)
+  }
 
-      }
+  await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      callback_query_id: body.callback_query.id
+    })
+  })
 
-      if (action.startsWith("done")) {
-
-        await supabase
-          .from("orders")
-          .update({ status: "completed" })
-          .eq("id", orderId)
-
-      }
-
-      return res.status(200).send("ok")
-    }
+  return res.status(200).send("ok")
+}
 
     /* ----------------------------
        2️⃣ xử lý /start connect shop

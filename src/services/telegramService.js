@@ -1,8 +1,6 @@
 import { supabase } from "./supabase"
 
-export async function sendTelegram(shopId, message) {
-
-  const token = "7984128523:AAEj_amC8R7X2XscpZyw32guN8RvJrdgHh0"
+export async function sendTelegram(shopId, message, orderId) {
 
   const { data } = await supabase
     .from("telegram_connections")
