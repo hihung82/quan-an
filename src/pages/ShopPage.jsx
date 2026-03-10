@@ -84,7 +84,8 @@ useEffect(() => {
   Ghi chú: ${form.note || "Không có"}
 
   Tổng: ${total}đ
-  `
+  `,
+  order.id
   )
     setShowSuccess(true)
     setCart([])
