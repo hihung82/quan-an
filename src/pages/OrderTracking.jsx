@@ -75,6 +75,7 @@ function OrderTracking() {
       <p>Khách: {order.customer_name}</p>
       <p>SĐT: {order.phone}</p>
       <p>Địa chỉ: {order.address}</p>
+      <p>📝 Ghi chú: {order.note}</p>
 
         <h3>Món đã đặt</h3>
 

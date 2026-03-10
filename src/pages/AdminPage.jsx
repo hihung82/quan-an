@@ -295,20 +295,31 @@ async function handleAddProduct() {
   }
 }
 
-  async function updateStatus(orderId, status) {
+async function updateStatus(orderId, status) {
 
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: status })
-      .eq("id", orderId)
+  const { error } = await supabase
+    .from("orders")
+    .update({ status })
+    .eq("id", orderId)
 
-    if (error) {
-      console.error(error)
-      return
-    }
-
-    fetchOrders()
+  if (error) {
+    console.error(error)
+    return
   }
+
+  await fetch("/api/update-telegram", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      orderId,
+      status
+    })
+  })
+
+  fetchOrders()
+}
 
   // 🚪 Logout
   async function handleLogout() {
