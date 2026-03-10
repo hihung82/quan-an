@@ -4,6 +4,7 @@ import Admin from "./pages/AdminPage"
 import Login from "./pages/LoginPage"
 import ReactDOM from "react-dom/client"
 import SuperAdmin from "./pages/SuperAdmin"
+import OrderTracking from "./pages/OrderTracking"
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
@@ -12,6 +13,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Route path="/admin/:slug" element={<Admin />} />
       <Route path="/login/:slug" element={<Login />} />
       <Route path="/super-admin" element={<SuperAdmin />} />
+      <Route path="/shop/:slug/order/:id" element={<OrderTracking />} />
     </Routes>
   </BrowserRouter>
 )

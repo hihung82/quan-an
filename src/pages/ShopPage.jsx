@@ -51,6 +51,7 @@ useEffect(() => {
 }, [slug])
 
 
+
   // =============================
   // CREATE ORDER
   // =============================
@@ -61,7 +62,9 @@ useEffect(() => {
     return;
   }
   try {
-    await createOrderWithItems(shop, form, cart, total)
+    const order = await createOrderWithItems(shop, form, cart, total)
+    localStorage.setItem("orderId", order.id)
+    navigate(`/shop/${slug}/order/${order.id}`)
     const itemsText = cart
     .map(item => `${item.name} x${item.quantity}`)
     .join("\n")
@@ -77,6 +80,8 @@ useEffect(() => {
 
   Món:
   ${itemsText}
+
+  Ghi chú: ${form.note || "Không có"}
 
   Tổng: ${total}đ
   `

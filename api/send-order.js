@@ -5,13 +5,22 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+let sentOrders = new Set()
+
 export default async function handler(req, res) {
 
   if (req.method !== "POST") {
     return res.status(200).send("send-order api working")
   }
 
-  const { shop_id, order_text } = req.body
+  const { shop_id, order_text, order_id } = req.body
+
+  // chống gửi trùng telegram
+  if (sentOrders.has(order_id)) {
+    return res.status(200).json({ ok: true })
+  }
+
+  sentOrders.add(order_id)
 
   // lấy chat_id của shop
   const { data } = await supabase
@@ -33,7 +42,23 @@ export default async function handler(req, res) {
     },
     body: JSON.stringify({
       chat_id: chatId,
-      text: order_text
+      text: order_text,
+
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Xác nhận",
+              callback_data: `confirm_${order_id}`
+            },
+            {
+              text: "Hoàn thành",
+              callback_data: `done_${order_id}`
+            }
+          ]
+        ]
+      }
+
     })
   })
 

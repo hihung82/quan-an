@@ -18,10 +18,11 @@ export async function sendTelegram(shopId, message) {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        shop_id: shopId,
-        order_text: message
-      })
+        body: JSON.stringify({
+        shop_id: shop.id,
+        order_text: message,
+        order_id: order.id
+        })
     })
 
   }

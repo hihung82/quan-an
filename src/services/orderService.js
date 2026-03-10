@@ -29,6 +29,7 @@ export async function createOrder(order) {
 }
 
 export async function createOrderWithItems(shop, form, cart, total) {
+
   const { data: order, error } = await supabase
     .from("orders")
     .insert({

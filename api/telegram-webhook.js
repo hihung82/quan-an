@@ -12,7 +12,43 @@ export default async function handler(req, res) {
       return res.status(200).send("ok")
     }
 
-    const message = req.body?.message
+    const body = req.body
+
+    /* ----------------------------
+       1️⃣ xử lý nút bấm telegram
+    ---------------------------- */
+
+    if (body.callback_query) {
+
+      const action = body.callback_query.data
+      const orderId = action.split("_")[1]
+
+      if (action.startsWith("confirm")) {
+
+        await supabase
+          .from("orders")
+          .update({ status: "preparing" })
+          .eq("id", orderId)
+
+      }
+
+      if (action.startsWith("done")) {
+
+        await supabase
+          .from("orders")
+          .update({ status: "completed" })
+          .eq("id", orderId)
+
+      }
+
+      return res.status(200).send("ok")
+    }
+
+    /* ----------------------------
+       2️⃣ xử lý /start connect shop
+    ---------------------------- */
+
+    const message = body?.message
 
     if (!message) return res.status(200).send("ok")
 
@@ -22,18 +58,18 @@ export default async function handler(req, res) {
     console.log("CHAT ID:", chatId)
     console.log("TEXT:", text)
 
-  if (text.startsWith("/start")) {
+    if (text.startsWith("/start")) {
 
-    const shopId = text.split(" ")[1]
+      const shopId = text.split(" ")[1]
 
-    const { data, error } = await supabase
-      .from("telegram_connections")
-      .insert({
-        shop_id: shopId,
-        chat_id: chatId
-      })
+      const { data, error } = await supabase
+        .from("telegram_connections")
+        .insert({
+          shop_id: shopId,
+          chat_id: chatId
+        })
 
-    console.log("SUPABASE:", data, error)
+      console.log("SUPABASE:", data, error)
 
       await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: "POST",

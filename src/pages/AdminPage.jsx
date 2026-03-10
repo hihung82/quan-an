@@ -192,7 +192,7 @@ async function uploadImage() {
         )
       `)
       .eq("shop_id", shop.id)
-      .eq("status", "pending")
+      .neq("status", "completed")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -294,6 +294,21 @@ async function handleAddProduct() {
     alert("Lỗi thêm món")
   }
 }
+
+  async function updateStatus(orderId, status) {
+
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: status })
+      .eq("id", orderId)
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    fetchOrders()
+  }
 
   // 🚪 Logout
   async function handleLogout() {
@@ -461,9 +476,18 @@ async function handleAddProduct() {
           </div>
     
 
-          <button onClick={() => completeOrder(order.id)}>
+        {order.status === "pending" && (
+          <button onClick={() => updateStatus(order.id, "preparing")}>
+            Xác nhận
+          </button>
+        )}
+
+        {order.status === "preparing" && (
+          <button onClick={() => updateStatus(order.id, "completed")}>
             Hoàn thành
           </button>
+        )}
+
         </div>
       ))}
     </div>
