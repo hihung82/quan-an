@@ -68,7 +68,7 @@ useEffect(() => {
     const itemsText = cart
     .map(item => `${item.name} x${item.quantity}`)
     .join("\n")
-  await sendTelegram(
+  sendTelegram(
     shop.id,
     `
   🔔 Đơn hàng mới
