@@ -246,11 +246,6 @@ input {
   border-radius: 50%;
 }
 
-.shop-name {
-  font-weight: bold;
-  font-size: 80px;
-}
-
 /* Chữ MENU to ở giữa */
 .menu-title {
   text-align: center;
@@ -453,7 +448,6 @@ color:#666;
 }
 
 .shop-info{
-text-align:center;
 margin-bottom:20px;
 }
 

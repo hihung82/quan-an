@@ -21,19 +21,22 @@ function ShopList() {
 
   return (
     <div style={{
-      maxWidth: "1000px",
+      maxWidth: "1100px",
       margin: "auto",
       padding: "20px"
     }}>
       
-      <h1 style={{ marginBottom: "30px" }}>
+      <h1 style={{
+        marginBottom: "30px",
+        textAlign: "center"
+      }}>
         Chọn quán
       </h1>
 
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(250px,1fr))",
-        gap: "20px"
+        gridTemplateColumns: "repeat(auto-fill, minmax(260px,1fr))",
+        gap: "25px"
       }}>
 
         {shops.map((shop) => (
@@ -43,48 +46,76 @@ function ShopList() {
             style={{ textDecoration: "none", color: "black" }}
           >
 
-            <div style={{
-              border: "1px solid #ddd",
-              borderRadius: "12px",
-              overflow: "hidden",
-              background: "white",
-              transition: "0.2s",
-              cursor: "pointer"
-            }}
-            onMouseEnter={(e)=>{
-              e.currentTarget.style.transform="scale(1.03)"
-            }}
-            onMouseLeave={(e)=>{
-              e.currentTarget.style.transform="scale(1)"
-            }}
+            <div
+              style={{
+                border: "1px solid #eee",
+                borderRadius: "14px",
+                background: "white",
+                padding: "20px",
+                transition: "0.25s",
+                cursor: "pointer",
+                textAlign: "center",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+              }}
+              onMouseEnter={(e)=>{
+                e.currentTarget.style.transform="translateY(-5px)"
+                e.currentTarget.style.boxShadow="0 8px 20px rgba(0,0,0,0.1)"
+              }}
+              onMouseLeave={(e)=>{
+                e.currentTarget.style.transform="translateY(0)"
+                e.currentTarget.style.boxShadow="0 2px 8px rgba(0,0,0,0.05)"
+              }}
             >
 
+              {/* LOGO */}
               <img
-                src={shop.logo_url || "https://via.placeholder.com/300x150"}
+                src={shop.logo_url || "https://via.placeholder.com/120"}
                 alt=""
                 style={{
-                  width: "80%",
-                  height: "150px",
-                  objectFit: "cover"
+                  width: "90px",
+                  height: "90px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  marginBottom: "10px"
                 }}
               />
 
-              <div style={{ padding: "15px" }}>
-                <h2 style={{
-                  margin: 0,
-                  fontSize: "18px"
-                }}>
-                  {shop.name}
-                </h2>
+              {/* NAME */}
+              <h2 style={{
+                margin: "5px 0",
+                fontSize: "18px"
+              }}>
+                {shop.name}
+              </h2>
 
+              {/* DESCRIPTION */}
+              <p style={{
+                color: "#666",
+                fontSize: "14px",
+                minHeight: "40px"
+              }}>
+                {shop.description || "Quán ăn"}
+              </p>
+
+              {/* ADDRESS */}
+              {shop.address && (
                 <p style={{
-                  marginTop: "8px",
-                  color: "#666",
-                  fontSize: "14px"
+                  fontSize: "13px",
+                  color: "#888"
                 }}>
-                  {shop.description || "Quán ăn"}
+                  📍 {shop.address}
                 </p>
-              </div>
+              )}
+
+              {/* OPEN TIME */}
+              {shop.open_time && (
+                <p style={{
+                  fontSize: "13px",
+                  color: "#888"
+                }}>
+                  🕒 {shop.open_time} - {shop.close_time}
+                </p>
+              )}
 
             </div>
 
