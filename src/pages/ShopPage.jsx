@@ -17,9 +17,10 @@ function App() {
   }, [slug])
   
   const [products, setProducts] = useState([]);
-  const { cart, addToCart, total, setCart } = useCart()
+  const { cart, addToCart, total, setCart, increase, decrease } = useCart()
   const [showSuccess, setShowSuccess] = useState(false);
   const [shop, setShop] = useState(null);
+  const [showCheckout, setShowCheckout] = useState(false)
 
   const [form, setForm] = useState({
     name: "",
@@ -124,7 +125,23 @@ useEffect(() => {
         className="shop-logo"
       />
     )}
-    <h2 className="shop-name">{shop.name}</h2>
+<div className="shop-info">
+
+<h2 className="shop-name">{shop.name}</h2>
+
+<p className="shop-address">
+📍 {shop.address}
+</p>
+
+<p className="shop-phone">
+📞 {shop.phone}
+</p>
+
+<p className="shop-time">
+🕒 {shop.open_time} - {shop.close_time}
+</p>
+
+</div>
   </div>
 )}
 
@@ -148,53 +165,82 @@ useEffect(() => {
       ))}
     </div>
 
-    <h2>Giỏ hàng</h2>
+{showCheckout && (
+  <div className="overlay">
+    <div className="popup">
 
-    {cart.length === 0 ? (
-      <p style={{ color: "#888" }}>Vui lòng chọn món</p>
-    ) : (
-      cart.map(item => (
-        <div key={item.id}>
-          {item.name} x {item.quantity}
-        </div>
-      ))
-    )}
+      <h2>Giỏ hàng</h2>
 
-    <h3>Tổng: {total} đ</h3>
+{cart.map(item => (
+  <div key={item.id} className="cart-item">
 
-    <h2>Thông tin đặt hàng</h2>
+    <div className="cart-left">
+      <div>{item.name}</div>
+      <div className="item-price">
+        {item.price}đ x {item.quantity} = <b>{item.price * item.quantity}đ</b>
+      </div>
+    </div>
 
-    <input
-      placeholder="Tên"
-      value={form.name}
-      onChange={e => setForm({ ...form, name: e.target.value })}
-    />
-    <br />
+    <div className="qty-control">
 
-    <input
-      placeholder="Số điện thoại"
-      value={form.phone}
-      onChange={e => setForm({ ...form, phone: e.target.value })}
-    />
-    <br />
+      <button onClick={() => decrease(item.id)}>
+        -
+      </button>
 
-    <input
-      placeholder="Địa chỉ"
-      value={form.address}
-      onChange={e => setForm({ ...form, address: e.target.value })}
-    />
-    <br />
+      <span>{item.quantity}</span>
 
-    <textarea
-      placeholder="Ghi chú"
-      value={form.note}
-      onChange={e => setForm({ ...form, note: e.target.value })}
-    />
-    <br />
+      <button onClick={() => increase(item.id)}>
+        +
+      </button>
 
-    <button onClick={placeOrder}>
-      Đặt món
-    </button>
+    </div>
+
+  </div>
+))}
+
+      <h3>Tổng: {total} đ</h3>
+
+      <input
+        placeholder="Tên"
+        value={form.name}
+        onChange={e => setForm({ ...form, name: e.target.value })}
+      />
+
+      <input
+        placeholder="Số điện thoại"
+        value={form.phone}
+        onChange={e => setForm({ ...form, phone: e.target.value })}
+      />
+
+      <input
+        placeholder="Địa chỉ"
+        value={form.address}
+        onChange={e => setForm({ ...form, address: e.target.value })}
+      />
+
+      <textarea
+        placeholder="Ghi chú"
+        value={form.note}
+        onChange={e => setForm({ ...form, note: e.target.value })}
+      />
+
+      <button
+        className="button"
+        onClick={placeOrder}
+      >
+        Gửi đơn
+      </button>
+
+      <button
+        onClick={() => setShowCheckout(false)}
+      >
+        Hủy
+      </button>
+
+    </div>
+  </div>
+)}
+
 
     {showSuccess && (
       <div className="overlay">
@@ -211,6 +257,24 @@ useEffect(() => {
         </div>
       </div>
     )}
+
+{cart.length > 0 && (
+  <div className="cart-bar">
+
+    <div>
+      🛒 {cart.reduce((sum, i) => sum + i.quantity, 0)} món
+      | {total} đ
+    </div>
+
+    <button
+      className="button"
+      onClick={() => setShowCheckout(true)}
+    >
+      Đặt hàng
+    </button>
+
+  </div>
+)}
 
     <ChatBot shopId={shop?.id} />
 

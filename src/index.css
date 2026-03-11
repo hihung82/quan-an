@@ -240,15 +240,15 @@ input {
 }
 
 .logo {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
   border-radius: 50%;
 }
 
 .shop-name {
   font-weight: bold;
-  font-size: 20px;
+  font-size: 80px;
 }
 
 /* Chữ MENU to ở giữa */
@@ -339,14 +339,14 @@ input {
 }
 
 .shop-name {
-  font-size: 50px;
+  font-size: 30px;
   font-weight: bold;
   margin: 0;
 }
 
 .brand-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 700;
   color: #0284c7;
 }
@@ -398,4 +398,69 @@ input {
   border-radius:8px;
   border:none;
   cursor:pointer;
+}
+
+
+.cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #ddd;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.menu-grid{
+padding-bottom: 100px;
+}
+
+.cart-item{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin:8px 0;
+}
+
+.qty-control{
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+.qty-control button{
+width:28px;
+height:28px;
+border:none;
+background:#eee;
+border-radius:6px;
+cursor:pointer;
+}
+
+.cart-left{
+display:flex;
+flex-direction:column;
+}
+
+.item-price{
+font-size:13px;
+color:#666;
+}
+
+.shop-info{
+text-align:center;
+margin-bottom:20px;
+}
+
+.shop-address,
+.shop-phone,
+.shop-time{
+color:#555;
+font-size:14px;
+margin:3px 0;
 }

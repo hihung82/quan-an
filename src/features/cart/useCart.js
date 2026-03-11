@@ -25,5 +25,33 @@ export function useCart() {
     [cart]
   )
 
-  return { cart, addToCart, total, setCart }
+  function increase(id) {
+  setCart(cart.map(item =>
+    item.id === id
+      ? { ...item, quantity: item.quantity + 1 }
+      : item
+  ))
 }
+
+function decrease(id) {
+  setCart(
+    cart
+      .map(item =>
+        item.id === id
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      )
+      .filter(item => item.quantity > 0)
+  )
+}
+
+return {
+  cart,
+  addToCart,
+  total,
+  setCart,
+  increase,
+  decrease
+}
+}
+
