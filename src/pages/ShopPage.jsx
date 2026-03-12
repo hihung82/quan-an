@@ -343,6 +343,8 @@ useEffect(() => {
 )}
 
 <LocationPicker
+  shop={shop}
+  position={userLocation}
   onSelect={(loc) => {
     setUserLocation(loc)
   }}

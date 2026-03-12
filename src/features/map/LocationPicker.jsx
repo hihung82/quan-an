@@ -1,5 +1,30 @@
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet"
 import { useState, useEffect } from "react"
+import L from "leaflet"
+import "leaflet/dist/leaflet.css"
+
+import markerIcon from "leaflet/dist/images/marker-icon.png"
+import markerShadow from "leaflet/dist/images/marker-shadow.png"
+
+
+delete L.Icon.Default.prototype._getIconUrl
+
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow
+})
+
+const shopIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+  iconSize: [28, 28],
+  iconAnchor: [14, 28]
+})
+
+const userIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/64/64113.png",
+  iconSize: [28, 28],
+  iconAnchor: [14, 28]
+})
 
 function ChangeView({ position }) {
   const map = useMap()
@@ -36,11 +61,15 @@ function Picker({ onSelect }) {
   return position ? <Marker position={position} /> : null
 }
 
-export default function LocationPicker({ onSelect, position }) {
+export default function LocationPicker({ onSelect, position, shop }) {
+
+    const shopPosition = shop
+  ? [shop.latitude, shop.longitude]
+  : [21.03, 105.85]
 
   return (
     <MapContainer
-      center={[21.30825,105.59329]}
+      center={shopPosition}
       zoom={13}
       style={{ height: "180px", width: "100%" }}
     >
@@ -48,6 +77,13 @@ export default function LocationPicker({ onSelect, position }) {
       <TileLayer
         url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
       />
+
+      {shop && (
+  <Marker
+    position={[shop.latitude, shop.longitude]}
+    icon={shopIcon}
+  />
+)}
 
       <ChangeView position={position} />
 
