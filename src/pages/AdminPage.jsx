@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
 import { useNavigate } from "react-router-dom";
-import { addProduct, getProductsByShop, deleteProduct } from "../services/productService"
+import { addProduct, getProductsByShop, deleteProduct, updateProduct } from "../services/productService"
 import { getShopBySlug } from "../services/shopService"
 import { useParams } from "react-router-dom"
 import AddProductPopup from "../components/AddProductPopup"
@@ -83,6 +83,30 @@ async function fetchStats() {
   })
 
   setStats(Object.values(map))
+}
+
+async function handleEditPrice(product) {
+
+  const newPrice = prompt("Nhập giá mới", product.price)
+
+  if (!newPrice) return
+
+  await updateProduct(product.id, {
+    price: Number(newPrice)
+  })
+
+  const updated = await getProductsByShop(shop.id)
+  setProducts(updated)
+}
+
+async function toggleBestSeller(product) {
+
+  await updateProduct(product.id, {
+    best_seller: !product.best_seller
+  })
+
+  const updated = await getProductsByShop(shop.id)
+  setProducts(updated)
 }
 
   useEffect(() => {
@@ -256,6 +280,29 @@ async function uploadImage() {
   fetchOrders(); // luôn sync lại từ DB
 }
 
+async function editPrice(product) {
+
+  const newPrice = prompt("Nhập giá mới", product.price)
+
+  if (!newPrice) return
+
+  const { error } = await supabase
+    .from("products")
+    .update({
+      price: Number(newPrice)
+    })
+    .eq("id", product.id)
+
+  if (error) {
+    console.error(error)
+    alert("Lỗi cập nhật giá")
+    return
+  }
+
+  const updated = await getProductsByShop(shop.id)
+  setProducts(updated)
+}
+
 async function handleAddProduct() {
   try {
 
@@ -329,6 +376,7 @@ async function updateStatus(orderId, status) {
 
   if (!user) return <div>Chưa đăng nhập</div>;
 
+
   return (
     <div style={{ padding: 20 }}>
       <h1>Đơn hàng mới</h1>
@@ -338,24 +386,46 @@ async function updateStatus(orderId, status) {
 
   <div className="menu-grid">
 
-    {products.map(product => (
-      <div key={product.id} className="product-card">
+{[...products]
+  .sort((a, b) => b.best_seller - a.best_seller)
+  .map(product => (
+  <div key={product.id} className="product-card">
 
-        <button
-          className="delete-btn"
-          onClick={() => handleDelete(product.id)}
-        >
-          −
-        </button>
-
-        <img src={product.image_url} />
-        <h3>{product.name}</h3>
-        <p>{product.description}</p>
-        <b>{product.price} đ</b>
-
+    {product.best_seller && (
+      <div className="best-badge">
+        🔥 Best Seller
       </div>
-    ))}
+    )}
 
+    <button
+      className="delete-btn"
+      onClick={() => handleDelete(product.id)}
+    >
+      −
+    </button>
+
+    <img src={product.image_url} />
+
+    <h3>{product.name}</h3>
+
+    <p>{product.description}</p>
+
+    <b>{product.price.toLocaleString("vi-VN")} đ</b>
+
+    <div style={{marginTop:8, display:"flex", gap:6}}>
+
+      <button onClick={() => editPrice(product)}>
+        Sửa giá
+      </button>
+
+      <button onClick={() => toggleBestSeller(product)}>
+        {product.best_seller ? "Bỏ Best Seller" : "Đặt Best Seller"}
+      </button>
+
+    </div>
+
+  </div>
+))}
     <div
       className="product-card add-card"
       onClick={() => setShowAdd(true)}
@@ -446,7 +516,17 @@ async function updateStatus(orderId, status) {
   </div>
 )}
 
-      {orders.map((order) => (
+      {orders.map((order) => {
+
+  const subtotal = order.order_items?.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  )
+
+  const ship = order.total_amount - subtotal
+
+  return (
+
         <div
           key={order.id}
           style={{
@@ -473,9 +553,17 @@ async function updateStatus(orderId, status) {
             </p>
           )}
 
-          <p>
-            Tổng tiền: <b>{order.total_amount} đ</b>
-          </p>
+<p>
+  Tiền món: <b>{subtotal.toLocaleString("vi-VN")} đ</b>
+</p>
+
+<p>
+  Ship: <b>{ship.toLocaleString("vi-VN")} đ</b>
+</p>
+
+<p>
+  Tổng: <b>{order.total_amount.toLocaleString("vi-VN")} đ</b>
+</p>
 
           <div style={{ marginTop: 10 }}>
             <b>Danh sách món:</b>
@@ -500,7 +588,8 @@ async function updateStatus(orderId, status) {
         )}
 
         </div>
-      ))}
+  )
+})}
     </div>
   );
 }

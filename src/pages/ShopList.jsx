@@ -25,6 +25,22 @@ function ShopList() {
       margin: "auto",
       padding: "20px"
     }}>
+
+        <div className="brand-header">
+
+  <div className="brand-row">
+    <img 
+      src="/logo.png"
+      alt="MONLEO"
+      className="brand-logo"
+    />
+
+    <h1 className="brand-title">
+      MONLEO
+    </h1>
+  </div>
+
+</div>
       
       <h1 style={{
         marginBottom: "30px",

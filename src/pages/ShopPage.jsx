@@ -8,19 +8,30 @@ import  ChatBot  from "../features/chatbot/ChatBot"
 import "../index.css"
 import { useNavigate } from "react-router-dom"
 import { sendTelegram } from "../services/telegramService"
+import "leaflet/dist/leaflet.css"
+import { getDistance } from "../services/distanceService"
+import LocationPicker from "../features/map/LocationPicker"
+import { searchAddress } from "../services/geocodeService"
 
 function App() {
   const { slug } = useParams()
   const navigate = useNavigate()
+  const [showLocationWarning, setShowLocationWarning] = useState(false)
   useEffect(() => {
   console.log("slug:", slug)
   }, [slug])
   
+  console.log(getDistance)
+
   const [products, setProducts] = useState([]);
   const { cart, addToCart, total, setCart, increase, decrease } = useCart()
   const [showSuccess, setShowSuccess] = useState(false);
   const [shop, setShop] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false)
+  const [userLocation,setUserLocation] = useState(null)
+  const [distance, setDistance] = useState(0)
+  const [shipFee, setShipFee] = useState(0)
+  const [suggestions, setSuggestions] = useState([])
 
   const [form, setForm] = useState({
     name: "",
@@ -39,10 +50,14 @@ useEffect(() => {
     try {
       const shop = await getShopBySlug(slug)
       setShop(shop)
+      console.log("SHOP DATA:", shop)
 
 
-      const products = await getProductsByShop(shop.id)
-      setProducts(products)
+const products = await getProductsByShop(shop.id)
+
+products.sort((a,b)=>b.best_seller - a.best_seller)
+
+setProducts(products)
     } catch (err) {
       console.error(err)
     }
@@ -51,7 +66,42 @@ useEffect(() => {
   load()
 }, [slug])
 
+useEffect(() => {
 
+  if (!userLocation || !shop) return
+
+  async function calc() {
+
+    const d = await getDistance(
+      { lat: shop.latitude, lng: shop.longitude },
+      userLocation
+    )
+
+    setDistance(d)
+
+  }
+
+  calc()
+
+}, [userLocation, shop])
+
+
+useEffect(() => {
+
+  if (!distance || !shop) return
+
+  let fee = 0
+
+  if (distance <= shop.free_ship_km) {
+    fee = 0
+  } else {
+    const extraKm = distance - shop.free_ship_km
+    fee = 10000 + extraKm * 3000
+  }
+
+  setShipFee(Math.round(fee))
+
+}, [distance, shop])
 
   // =============================
   // CREATE ORDER
@@ -62,8 +112,17 @@ useEffect(() => {
     alert("Bạn chưa chọn món nào");
     return;
   }
+
+  if (!userLocation) {
+    setShowLocationWarning(true)
+
+    setTimeout(() => {
+      setShowLocationWarning(false)
+    }, 3000)
+  }
+
   try {
-    const order = await createOrderWithItems(shop, form, cart, total)
+    const order = await createOrderWithItems(shop, form, cart, total + shipFee)
     localStorage.setItem("orderId", order.id)
     navigate(`/shop/${slug}/order/${order.id}`)
     const itemsText = cart
@@ -84,7 +143,10 @@ useEffect(() => {
 
   Ghi chú: ${form.note || "Không có"}
 
-  Tổng: ${total}đ
+  Tiền món: ${total.toLocaleString("vi-VN")}đ
+  Ship: ${shipFee.toLocaleString("vi-VN")}đ
+
+  Tổng: ${(total + shipFee).toLocaleString("vi-VN")}đ
   `,
   order.id
   )
@@ -147,13 +209,20 @@ useEffect(() => {
 
 <h1 className="menu-title">MENU</h1>
 
-    <div className="menu-grid">
-      {products.map(product => (
-        <div key={product.id} className="product-card">
-          <img src={product.image_url} alt={product.name} />
-          <h3>{product.name}</h3>
-          <p>{product.description}</p>
-          <p><b>{product.price} đ</b></p>
+<div className="menu-grid">
+  {products.map(product => (
+    <div key={product.id} className="product-card">
+
+      {product.best_seller && (
+        <div className="best-badge">
+          🔥 Best Seller
+        </div>
+      )}
+
+      <img src={product.image_url} alt={product.name} />
+      <h3>{product.name}</h3>
+      <p>{product.description}</p>
+      <p><b>{product.price.toLocaleString("vi-VN")} đ</b></p>
 
           <button
             className="button"
@@ -177,7 +246,7 @@ useEffect(() => {
     <div className="cart-left">
       <div>{item.name}</div>
       <div className="item-price">
-        {item.price}đ x {item.quantity} = <b>{item.price * item.quantity}đ</b>
+        {item.price.toLocaleString("vi-VN")}đ x {item.quantity} = <b>{(item.price * item.quantity).toLocaleString("vi-VN")}đ</b>
       </div>
     </div>
 
@@ -198,7 +267,11 @@ useEffect(() => {
   </div>
 ))}
 
-      <h3>Tổng: {total} đ</h3>
+<p>Khoảng cách: {distance.toFixed(2)} km</p>
+
+<p>Phí ship: {shipFee.toLocaleString("vi-VN")} đ</p>
+
+<h3>Tổng: {(total + shipFee).toLocaleString("vi-VN")} đ</h3>
 
       <input
         placeholder="Tên"
@@ -212,11 +285,68 @@ useEffect(() => {
         onChange={e => setForm({ ...form, phone: e.target.value })}
       />
 
-      <input
-        placeholder="Địa chỉ"
-        value={form.address}
-        onChange={e => setForm({ ...form, address: e.target.value })}
-      />
+<input
+  placeholder="Địa chỉ"
+  value={form.address}
+  onChange={async (e) => {
+
+    const value = e.target.value
+
+    setForm({ ...form, address: value })
+
+    if (value.length < 3) {
+      setSuggestions([])
+      return
+    }
+
+    const results = await searchAddress(value)
+
+    setSuggestions(results)
+
+  }}
+/>
+
+{suggestions.map((s, i) => (
+
+  <div
+    key={i}
+    style={{
+      padding: "6px",
+      borderBottom: "1px solid #eee",
+      cursor: "pointer"
+    }}
+    onClick={() => {
+
+      setForm({ ...form, address: s.label })
+
+      setUserLocation({
+        lat: s.lat,
+        lng: s.lng
+      })
+
+      setSuggestions([])
+
+    }}
+  >
+    {s.label}
+  </div>
+
+))}
+
+<div style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
+  📍 Chọn vị trí của bạn trên bản đồ để tính phí ship chính xác
+</div>
+{!userLocation && (
+  <p style={{color:"red", fontSize:"14px"}}>
+    ⚠️ Vui lòng chọn vị trí trên bản đồ để đặt hàng
+  </p>
+)}
+
+<LocationPicker
+  onSelect={(loc) => {
+    setUserLocation(loc)
+  }}
+/>
 
       <textarea
         placeholder="Ghi chú"
@@ -227,6 +357,7 @@ useEffect(() => {
       <button
         className="button"
         onClick={placeOrder}
+        disabled={!userLocation}
       >
         Gửi đơn
       </button>
@@ -258,12 +389,12 @@ useEffect(() => {
       </div>
     )}
 
-{cart.length > 0 && (
+{cart.length > 0 && !showCheckout && (
   <div className="cart-bar">
 
     <div>
       🛒 {cart.reduce((sum, i) => sum + i.quantity, 0)} món
-      | {total} đ
+      | {total.toLocaleString("vi-VN")} đ
     </div>
 
     <button
@@ -276,7 +407,7 @@ useEffect(() => {
   </div>
 )}
 
-    <ChatBot shopId={shop?.id} />
+    <ChatBot shopId={shop?.id} phone={shop?.phone} />
 
   </div>
 );

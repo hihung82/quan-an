@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { supabase } from "../../services/supabase"
 
-export default function ChatBot({ shopId }) {
+export default function ChatBot({ shopId, phone }) {
 
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([])
@@ -30,7 +30,7 @@ export default function ChatBot({ shopId }) {
 
     const userMessage = { text: input, sender: "user" }
 
-    let reply = "Xin lỗi, vui lòng gọi quán để được hỗ trợ."
+    let reply = `Vui lòng gọi số ${phone} để được hỗ trợ trực tiếp.`
 
     for (let r of responses) {
       if (input.toLowerCase().includes(r.keyword)) {
