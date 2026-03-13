@@ -300,7 +300,28 @@ cleanCart = Object.values(merged)
 
     navigate(`/shop/${slug}/order/${order.id}`)
 
-const itemsText = cleanCart
+const telegramMerged = {}
+
+cleanCart.forEach(item => {
+
+  const key = item.product_id
+
+  if (!telegramMerged[key]) {
+
+    telegramMerged[key] = {
+      product_id: item.product_id,
+      quantity: item.quantity
+    }
+
+  } else {
+
+    telegramMerged[key].quantity += item.quantity
+
+  }
+
+})
+
+const itemsText = Object.values(telegramMerged)
   .map(item => {
 
     const product = products.find(p => p.id === item.product_id)

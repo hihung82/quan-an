@@ -520,6 +520,23 @@ async function updateStatus(orderId, status) {
 
       {orders.map((order) => {
 
+const mergedItems = {}
+
+order.order_items?.forEach(item => {
+
+  const name = item.products?.name
+
+  if (!mergedItems[name]) {
+    mergedItems[name] = {
+      ...item,
+      quantity: item.quantity
+    }
+  } else {
+    mergedItems[name].quantity += item.quantity
+  }
+
+})
+
   const subtotal = order.order_items?.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -569,11 +586,11 @@ async function updateStatus(orderId, status) {
 
           <div style={{ marginTop: 10 }}>
             <b>Danh sách món:</b>
-            {order.order_items?.map((item, index) => (
-              <div key={index}>
-                - {item.products?.name} x {item.quantity}
-              </div>
-            ))}
+{Object.values(mergedItems).map((item, index) => (
+  <div key={index}>
+    - {item.products?.name} x {item.quantity}
+  </div>
+))}
           </div>
     
 
