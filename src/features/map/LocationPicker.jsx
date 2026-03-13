@@ -58,7 +58,12 @@ function Picker({ onSelect }) {
     }
   })
 
-  return position ? <Marker position={position} /> : null
+  return position ? (
+  <Marker
+    position={position}
+    icon={userIcon}
+  />
+) : null
 }
 
 export default function LocationPicker({ onSelect, position, shop }) {
@@ -87,9 +92,12 @@ export default function LocationPicker({ onSelect, position, shop }) {
 
       <ChangeView position={position} />
 
-      {position && (
-        <Marker position={[position.lat, position.lng]} />
-      )}
+{position && (
+  <Marker
+    position={[position.lat, position.lng]}
+    icon={userIcon}
+  />
+)}
 
       <Picker onSelect={onSelect} />
 
