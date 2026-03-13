@@ -529,3 +529,21 @@ margin-top:6px;
 
   z-index: 0;
 }
+
+.group-btn{
+  background: linear-gradient(135deg,#ff7a18,#ffb347);
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 15px;
+  transition: all 0.2s;
+}
+
+.group-btn:hover{
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}

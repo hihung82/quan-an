@@ -44,15 +44,16 @@ function OrderTracking() {
 
     setOrder(data)
 
-    const { data: itemsData } = await supabase
-    .from("order_items")
-    .select(`
-        quantity,
-        product:product_id (
-        name
-        )
-    `)
-    .eq("order_id", id)
+const { data: itemsData } = await supabase
+.from("order_items")
+.select(`
+    quantity,
+    member_name,
+    products (
+      name
+    )
+`)
+.eq("order_id", id)
 
     setItems(itemsData)
   }
@@ -64,6 +65,20 @@ function OrderTracking() {
   if (order.status === "pending") text = "⏳ Chờ shop xác nhận"
   if (order.status === "preparing") text = "🍳 Shop đang làm"
   if (order.status === "completed") text = "🚚 Đang giao"
+
+  const grouped = items.reduce((acc, item) => {
+
+  const name = item.member_name || "Khách"
+
+  if (!acc[name]) {
+    acc[name] = []
+  }
+
+  acc[name].push(item)
+
+  return acc
+
+}, {})
 
   return (
     <div style={{ padding: 20 }}>
@@ -80,11 +95,21 @@ function OrderTracking() {
 
         <h3>Món đã đặt</h3>
 
-        {items?.map((i, index) => (
-        <div key={index}>
-            {i.product?.name} x{i.quantity}
-        </div>
-        ))}
+{Object.entries(grouped).map(([member, list]) => (
+
+  <div key={member} style={{marginBottom:"10px"}}>
+
+    <b>👤 {member}</b>
+
+    {list.map((i, idx)=>(
+      <div key={idx} style={{marginLeft:"10px"}}>
+        - {i.products?.name} x{i.quantity}
+      </div>
+    ))}
+
+  </div>
+
+))}
 
     </div>
   )

@@ -12,11 +12,15 @@ import "leaflet/dist/leaflet.css"
 import { getDistance } from "../services/distanceService"
 import LocationPicker from "../features/map/LocationPicker"
 import { searchAddress } from "../services/geocodeService"
+import { supabase } from "../services/supabase"
 
 function App() {
   const { slug } = useParams()
+  const params = new URLSearchParams(window.location.search)
+  const groupId = params.get("group")
   const navigate = useNavigate()
   const [showLocationWarning, setShowLocationWarning] = useState(false)
+const checkout = params.get("checkout")
   useEffect(() => {
   console.log("slug:", slug)
   }, [slug])
@@ -39,6 +43,12 @@ function App() {
     address: "",
     note: ""
   });
+
+  useEffect(() => {
+  if (checkout === "1") {
+    setShowCheckout(true)
+  }
+}, [checkout])
 
   // =============================
   // LOAD PRODUCTS
@@ -65,6 +75,104 @@ setProducts(products)
 
   load()
 }, [slug])
+
+useEffect(() => {
+
+  async function loadGroupCart(){
+
+    if(!groupId) return
+
+    const { data } = await supabase
+      .from("group_items")
+      .select("*")
+      .eq("group_id", groupId)
+
+    if(data){
+const groupCart = data.map(i=>({
+  id: i.id,              // dùng id của database
+  product_id: i.product_id,
+  quantity: i.quantity,
+  price: i.price,
+  name: i.member_name
+}))
+
+      setCart(groupCart)
+    }
+
+  }
+
+  loadGroupCart()
+
+},[groupId])
+
+async function createGroupOrder() {
+
+  const name = prompt("Tên của bạn")
+
+  const { data, error } = await supabase
+    .from("group_orders")
+    .insert({
+      shop_id: shop.id,
+      host_name: name
+    })
+    .select()
+    .single()
+
+  if(error){
+    console.error(error)
+    return
+  }
+
+  navigate(`/shop/${slug}/group/${data.id}`)
+}
+
+async function addGroupItem(product){
+
+  const name = prompt("Tên bạn")
+
+  const { data: existing } = await supabase
+    .from("group_items")
+    .select("*")
+    .eq("group_id", groupId)
+    .eq("product_id", product.id)
+    .eq("member_name", name)
+    .maybeSingle()
+
+  if(existing){
+
+    const { error } = await supabase
+      .from("group_items")
+      .update({
+        quantity: existing.quantity + 1
+      })
+      .eq("id", existing.id)
+
+    if(error){
+      console.error(error)
+      alert("Lỗi cập nhật món")
+    }
+
+  }else{
+
+    const { error } = await supabase
+      .from("group_items")
+      .insert({
+        group_id: groupId,
+        member_name: name,
+        product_id: product.id,
+        quantity: 1,
+        price: product.price
+      })
+
+    if(error){
+      console.error(error)
+      alert("Lỗi thêm món")
+    }
+
+  }
+
+}
+
 
 useEffect(() => {
 
@@ -106,12 +214,12 @@ useEffect(() => {
   // =============================
   // CREATE ORDER
   // =============================
-  async function placeOrder() {
+async function placeOrder() {
 
-  if (!cart || cart.length === 0) {
-    alert("Bạn chưa chọn món nào");
-    return;
-  }
+if (!groupId && (!cart || cart.length === 0)) {
+  alert("Bạn chưa chọn món nào");
+  return;
+}
 
   if (!userLocation) {
     setShowLocationWarning(true)
@@ -119,43 +227,118 @@ useEffect(() => {
     setTimeout(() => {
       setShowLocationWarning(false)
     }, 3000)
+    return
+  }
+
+  let finalCart = cart
+  let finalTotal = total
+
+  // nếu là đơn nhóm
+  if (groupId) {
+
+    const { data: items } = await supabase
+      .from("group_items")
+      .select("*")
+      .eq("group_id", groupId)
+
+const groupCart = items.map(i => ({
+  id: i.id,
+  product_id: i.product_id,
+  quantity: i.quantity,
+  price: i.price,
+  name: i.member_name
+}))
+
+    finalCart = groupCart
+
+    finalTotal = groupCart.reduce(
+      (sum, i) => sum + i.price * i.quantity,
+      0
+    )
+
+    setCart(groupCart)
   }
 
   try {
-    const order = await createOrderWithItems(shop, form, cart, total + shipFee)
+
+let cleanCart = finalCart
+
+// chỉ merge khi KHÔNG phải group order
+if (!groupId) {
+
+  const merged = {}
+
+  finalCart.forEach(item => {
+
+    const key = item.product_id || item.id
+
+    if (!merged[key]) {
+      merged[key] = {
+        product_id: key,
+        quantity: item.quantity,
+        price: item.price,
+        name: item.name
+      }
+    } else {
+      merged[key].quantity += item.quantity
+    }
+
+  })
+
+  cleanCart = Object.values(merged)
+}
+
+    const order = await createOrderWithItems(
+      shop,
+      form,
+      cleanCart,
+      finalTotal + shipFee
+    )
+
     localStorage.setItem("orderId", order.id)
+
     navigate(`/shop/${slug}/order/${order.id}`)
-    const itemsText = cart
-    .map(item => `${item.name} x${item.quantity}`)
-    .join("\n")
-  sendTelegram(
-    shop.id,
-    `
-  🔔 Đơn hàng mới
 
-  Quán: ${shop.name}
-  Khách: ${form.name}
-  SĐT: ${form.phone}
-  Địa chỉ: ${form.address}
+    const itemsText = finalCart
+      .map(item => `${item.name} x${item.quantity}`)
+      .join("\n")
 
-  Món:
-  ${itemsText}
+    sendTelegram(
+      shop.id,
+      `
+🔔 Đơn hàng mới
 
-  Ghi chú: ${form.note || "Không có"}
+Quán: ${shop.name}
+Khách: ${form.name}
+SĐT: ${form.phone}
+Địa chỉ: ${form.address}
 
-  Tiền món: ${total.toLocaleString("vi-VN")}đ
-  Ship: ${shipFee.toLocaleString("vi-VN")}đ
+Món:
+${itemsText}
 
-  Tổng: ${(total + shipFee).toLocaleString("vi-VN")}đ
-  `,
-  order.id
-  )
+Ghi chú: ${form.note || "Không có"}
+
+Tiền món: ${finalTotal.toLocaleString("vi-VN")}đ
+Ship: ${shipFee.toLocaleString("vi-VN")}đ
+
+Tổng: ${(finalTotal + shipFee).toLocaleString("vi-VN")}đ
+`,
+      order.id
+    )
+
     setShowSuccess(true)
     setCart([])
+
   } catch (err) {
+    console.log(err)
     alert("Lỗi tạo đơn")
   }
 }
+
+const displayTotal = cart.reduce(
+  (sum, i) => sum + i.price * i.quantity,
+  0
+)
 
   // =============================
   // UI
@@ -207,7 +390,35 @@ useEffect(() => {
   </div>
 )}
 
+{!groupId && (
+<button 
+  className="group-btn"
+  onClick={createGroupOrder}
+>
+  Đặt theo nhóm
+</button>
+)}
+
+{groupId && (
+  <button
+    onClick={() => navigate(`/shop/${slug}/group/${groupId}`)}
+  >
+    Xem đơn nhóm
+  </button>
+)}
+
 <h1 className="menu-title">MENU</h1>
+
+{groupId && (
+  <div style={{
+    background:"#fff3cd",
+    padding:"10px",
+    marginBottom:"10px",
+    borderRadius:"8px"
+  }}>
+    👥 Bạn đang đặt món trong đơn nhóm
+  </div>
+)}
 
 <div className="menu-grid">
   {products.map(product => (
@@ -226,7 +437,15 @@ useEffect(() => {
 
           <button
             className="button"
-            onClick={() => addToCart(product)}
+            onClick={() => {
+
+  if(groupId){
+    addGroupItem(product)
+  }else{
+    addToCart(product)
+  }
+
+}}
           >
             Thêm vào giỏ
           </button>
@@ -271,7 +490,7 @@ useEffect(() => {
 
 <p>Phí ship: {shipFee.toLocaleString("vi-VN")} đ</p>
 
-<h3>Tổng: {(total + shipFee).toLocaleString("vi-VN")} đ</h3>
+<h3>Tổng: {(displayTotal + shipFee).toLocaleString("vi-VN")} đ</h3>
 
       <input
         placeholder="Tên"
@@ -391,7 +610,7 @@ useEffect(() => {
       </div>
     )}
 
-{cart.length > 0 && !showCheckout && (
+{!groupId && cart.length > 0 && !showCheckout && (
   <div className="cart-bar">
 
     <div>

@@ -52,10 +52,12 @@ async function fetchStats() {
       ),
       orders (
         created_at,
-        status
+        status,
+        shop_id
       )
     `)
     .gte("orders.created_at", date.toISOString())
+    .eq("orders.shop_id", shop.id)
 
   if (error) {
     console.error(error)

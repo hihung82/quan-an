@@ -6,6 +6,7 @@ import ReactDOM from "react-dom/client"
 import SuperAdmin from "./pages/SuperAdmin"
 import OrderTracking from "./pages/OrderTracking"
 import ShopList from "./pages/ShopList";
+import GroupOrder from "./pages/GroupOrder"
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
@@ -16,6 +17,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Route path="/super-admin" element={<SuperAdmin />} />
       <Route path="/shop/:slug/order/:id" element={<OrderTracking />} />
       <Route path="/shop" element={<ShopList />} />
+      <Route path="/shop/:slug/group/:groupId" element={<GroupOrder />} />
     </Routes>
   </BrowserRouter>
 )
