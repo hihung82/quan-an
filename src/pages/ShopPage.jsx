@@ -263,30 +263,31 @@ const groupCart = items.map(i => ({
 
 let cleanCart = finalCart
 
-// chỉ merge khi KHÔNG phải group order
-if (!groupId) {
 
-  const merged = {}
+const merged = {}
 
-  finalCart.forEach(item => {
+finalCart.forEach(item => {
 
-    const key = item.product_id || item.id
+  const key = `${item.product_id}_${item.member_name || "single"}`
 
-    if (!merged[key]) {
-      merged[key] = {
-        product_id: key,
-        quantity: item.quantity,
-        price: item.price,
-        name: item.name
-      }
-    } else {
-      merged[key].quantity += item.quantity
+  if (!merged[key]) {
+
+    merged[key] = {
+      product_id: item.product_id,
+      quantity: item.quantity,
+      price: item.price,
+      member_name: item.member_name
     }
 
-  })
+  } else {
 
-  cleanCart = Object.values(merged)
-}
+    merged[key].quantity += item.quantity
+
+  }
+
+})
+
+cleanCart = Object.values(merged)
 
     const order = await createOrderWithItems(
       shop,
@@ -299,7 +300,7 @@ if (!groupId) {
 
     navigate(`/shop/${slug}/order/${order.id}`)
 
-const itemsText = finalCart
+const itemsText = cleanCart
   .map(item => {
 
     const product = products.find(p => p.id === item.product_id)
@@ -341,10 +342,29 @@ Tổng: ${(finalTotal + shipFee).toLocaleString("vi-VN")}đ
   }
 }
 
-const displayTotal = cart.reduce(
+
+const mergedCart = Object.values(
+  cart.reduce((acc, item) => {
+
+    const key = item.product_id || item.id
+
+    if (!acc[key]) {
+      acc[key] = { ...item }
+    } else {
+      acc[key].quantity += item.quantity
+    }
+
+    return acc
+
+  }, {})
+)
+
+const displayTotal = mergedCart.reduce(
   (sum, i) => sum + i.price * i.quantity,
   0
 );
+
+
 
   // =============================
   // UI
@@ -465,7 +485,7 @@ const displayTotal = cart.reduce(
 
       <h2>Giỏ hàng</h2>
 
-{cart.map((item) => {
+{mergedCart.map((item) => {
   const product = products.find(
     (p) => p.id === (item.product_id || item.id)
   );
