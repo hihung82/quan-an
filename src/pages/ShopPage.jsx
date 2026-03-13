@@ -93,7 +93,7 @@ const groupCart = data.map(i=>({
   product_id: i.product_id,
   quantity: i.quantity,
   price: i.price,
-  name: i.member_name
+  member_name: i.member_name
 }))
 
       setCart(groupCart)
@@ -246,7 +246,7 @@ const groupCart = items.map(i => ({
   product_id: i.product_id,
   quantity: i.quantity,
   price: i.price,
-  name: i.member_name
+  member_name: i.member_name
 }))
 
     finalCart = groupCart
@@ -299,9 +299,15 @@ if (!groupId) {
 
     navigate(`/shop/${slug}/order/${order.id}`)
 
-    const itemsText = finalCart
-      .map(item => `${item.name} x${item.quantity}`)
-      .join("\n")
+const itemsText = finalCart
+  .map(item => {
+
+    const product = products.find(p => p.id === item.product_id)
+
+    return `${product?.name} x${item.quantity}`
+
+  })
+  .join("\n")
 
     sendTelegram(
       shop.id,
@@ -338,7 +344,7 @@ Tổng: ${(finalTotal + shipFee).toLocaleString("vi-VN")}đ
 const displayTotal = cart.reduce(
   (sum, i) => sum + i.price * i.quantity,
   0
-)
+);
 
   // =============================
   // UI
@@ -459,32 +465,34 @@ const displayTotal = cart.reduce(
 
       <h2>Giỏ hàng</h2>
 
-{cart.map(item => (
-  <div key={item.id} className="cart-item">
+{cart.map((item) => {
+  const product = products.find(
+    (p) => p.id === (item.product_id || item.id)
+  );
 
-    <div className="cart-left">
-      <div>{item.name}</div>
-      <div className="item-price">
-        {item.price.toLocaleString("vi-VN")}đ x {item.quantity} = <b>{(item.price * item.quantity).toLocaleString("vi-VN")}đ</b>
+  return (
+    <div key={item.id} className="cart-item">
+      <div className="cart-left">
+        <div>{product?.name}</div>
+
+        <div className="item-price">
+          {item.price.toLocaleString("vi-VN")}đ x {item.quantity} =
+          <b>
+            {(item.price * item.quantity).toLocaleString("vi-VN")}đ
+          </b>
+        </div>
+      </div>
+
+      <div className="qty-control">
+        <button onClick={() => decrease(item.id)}>-</button>
+
+        <span>{item.quantity}</span>
+
+        <button onClick={() => increase(item.id)}>+</button>
       </div>
     </div>
-
-    <div className="qty-control">
-
-      <button onClick={() => decrease(item.id)}>
-        -
-      </button>
-
-      <span>{item.quantity}</span>
-
-      <button onClick={() => increase(item.id)}>
-        +
-      </button>
-
-    </div>
-
-  </div>
-))}
+  );
+})}
 
 <p>Khoảng cách: {distance.toFixed(2)} km</p>
 
@@ -561,13 +569,15 @@ const displayTotal = cart.reduce(
   </p>
 )}
 
-<LocationPicker
-  shop={shop}
-  position={userLocation}
-  onSelect={(loc) => {
-    setUserLocation(loc)
-  }}
-/>
+{shop && (
+  <LocationPicker
+    shop={shop}
+    position={userLocation}
+    onSelect={(loc) => {
+      setUserLocation(loc)
+    }}
+  />
+)}
 
       <textarea
         placeholder="Ghi chú"
