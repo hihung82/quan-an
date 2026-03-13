@@ -48,10 +48,10 @@ export async function createOrderWithItems(shop, form, cart, total ) {
 
   const orderItems = cart.map(item => ({
     order_id: order.id,
-    product_id: item.product_id || item.id,
+    product_id: item.product_id ?? item.id,
     quantity: item.quantity,
     price: item.price,
-    member_name: item.member_name || form.name
+    member_name: item.member_name ?? form.name
   }))
 
   const { error: itemsError } = await supabase

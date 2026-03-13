@@ -272,12 +272,12 @@ finalCart.forEach(item => {
 
   if (!merged[key]) {
 
-    merged[key] = {
-      product_id: item.product_id,
-      quantity: item.quantity,
-      price: item.price,
-      member_name: item.member_name
-    }
+merged[key] = {
+  product_id: item.product_id || item.id,
+  quantity: item.quantity,
+  price: Number(item.price),
+  member_name: item.member_name
+}
 
   } else {
 
