@@ -351,7 +351,7 @@ ${itemsText}
 Ghi chú: ${form.note || "Không có"}
 
 Tiền món: ${finalTotal.toLocaleString("vi-VN")}đ
-Ship: ${shipFee.toLocaleString("vi-VN")}đ
+Ship dự kiến: ${shipFee.toLocaleString("vi-VN")}đ
 
 Tổng: ${(finalTotal + shipFee).toLocaleString("vi-VN")}đ
 `,
@@ -572,7 +572,7 @@ const filteredProducts = products.filter((p) => {
 
 <p>Khoảng cách: {distance.toFixed(2)} km</p>
 
-<p>Phí ship: {shipFee.toLocaleString("vi-VN")} đ</p>
+<p>Phí ship dự kiến: {shipFee.toLocaleString("vi-VN")} đ</p>
 
 <h3>Tổng: {(displayTotal + shipFee).toLocaleString("vi-VN")} đ</h3>
 

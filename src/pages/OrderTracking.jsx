@@ -91,7 +91,7 @@ const { data: itemsData } = await supabase
       <p>SĐT: {order.phone}</p>
       <p>Địa chỉ: {order.address}</p>
       <p>📝 Ghi chú: {order.note}</p>
-        <p>Tổng tiền: <b>{order.total_amount.toLocaleString("vi-VN")} đ</b></p>
+        <p>Tổng tiền dự kiến: <b>{order.total_amount.toLocaleString("vi-VN")} đ</b></p>
 
         <h3>Món đã đặt</h3>
 
