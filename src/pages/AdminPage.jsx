@@ -333,7 +333,8 @@ async function handleAddProduct() {
       price,
       description,
       image_url,
-      shop_id: shop.id
+      shop_id: shop.id,
+      category
     })
 
     alert("Thêm món thành công")

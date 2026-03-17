@@ -547,3 +547,17 @@ margin-top:6px;
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+
+.search-box{
+  width:100%;
+  padding:10px;
+  margin-bottom:15px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  font-size:16px;
+}
+
+.category-filter .active{
+  background:#ff7a00;
+  color:white;
+}

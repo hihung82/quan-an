@@ -19,7 +19,10 @@ function App() {
   const params = new URLSearchParams(window.location.search)
   const groupId = params.get("group")
   const navigate = useNavigate()
+  const [search, setSearch] = useState("")
+  const [category, setCategory] = useState("all")
   const [showLocationWarning, setShowLocationWarning] = useState(false)
+
 const checkout = params.get("checkout")
   useEffect(() => {
   console.log("slug:", slug)
@@ -36,6 +39,7 @@ const checkout = params.get("checkout")
   const [distance, setDistance] = useState(0)
   const [shipFee, setShipFee] = useState(0)
   const [suggestions, setSuggestions] = useState([])
+  const categories = ["all", ...new Set(products.map(p => p.category))]
 
   const [form, setForm] = useState({
     name: "",
@@ -385,7 +389,18 @@ const displayTotal = mergedCart.reduce(
   0
 );
 
+const filteredProducts = products.filter((p) => {
 
+  const matchSearch = p.name
+    .toLowerCase()
+    .includes(search.toLowerCase())
+
+  const matchCategory =
+    category === "all" || p.category === category
+
+  return matchSearch && matchCategory
+
+})
 
   // =============================
   // UI
@@ -456,6 +471,26 @@ const displayTotal = mergedCart.reduce(
 
 <h1 className="menu-title">MENU</h1>
 
+<input
+  type="text"
+  placeholder="🔎 Tìm món..."
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  className="search-box"
+/>
+
+<div className="category-filter">
+  {categories.map((c) => (
+    <button
+      key={c}
+      onClick={() => setCategory(c)}
+      className={category === c ? "active" : ""}
+    >
+      {c === "all" ? "Tất cả" : c}
+    </button>
+  ))}
+</div>
+
 {groupId && (
   <div style={{
     background:"#fff3cd",
@@ -468,7 +503,7 @@ const displayTotal = mergedCart.reduce(
 )}
 
 <div className="menu-grid">
-  {products.map(product => (
+  {filteredProducts.map(product => (
     <div key={product.id} className="product-card">
 
       {product.best_seller && (

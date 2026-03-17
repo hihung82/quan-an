@@ -8,6 +8,7 @@ function AddProductPopup({ onClose, shop }) {
   const [price, setPrice] = useState("")
   const [description, setDescription] = useState("")
   const [image, setImage] = useState(null)
+  const [category, setCategory] = useState("")
 
   async function handleAddProduct() {
 
@@ -44,7 +45,8 @@ function AddProductPopup({ onClose, shop }) {
     price,
     description,
     image_url,
-    shop_id: shop.id
+    shop_id: shop.id,
+    category
     })
 
 
@@ -87,6 +89,12 @@ function AddProductPopup({ onClose, shop }) {
           placeholder="Mô tả"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <input
+          placeholder="Category (vd: Đồ uống, Ăn vặt...)"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
         />
 
         <input
