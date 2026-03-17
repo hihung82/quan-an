@@ -208,7 +208,7 @@ useEffect(() => {
     fee = 0
   } else {
     const extraKm = distance - shop.free_ship_km
-    fee = 10000 + extraKm * 3000
+    fee = 15000 + extraKm * 3000
   }
 
   setShipFee(Math.round(fee))
