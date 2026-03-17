@@ -637,7 +637,7 @@ const filteredProducts = products.filter((p) => {
 ))}
 
 <div style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
-  📍 Chọn vị trí của bạn trên bản đồ để tính phí ship chính xác
+  📍 Chọn vị trí của bạn trên bản đồ để dự đoán phí ship
 </div>
 {!userLocation && (
   <p style={{color:"red", fontSize:"14px"}}>
